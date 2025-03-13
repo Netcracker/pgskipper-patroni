@@ -86,6 +86,8 @@ VOLUME /etc
 
 RUN chgrp 0 /etc &&  \
     chmod g+w /etc && \
+    chgrp 0 /etc/passwd &&  \
+    chmod g+w /etc/passwd && \
     mkdir /patroni && chmod -R 777 /patroni/ && \
     chmod +x /usr/libexec/fix-permissions && \
     /usr/libexec/fix-permissions /var/run/postgresql && \
