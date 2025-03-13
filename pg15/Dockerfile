@@ -82,7 +82,9 @@ RUN python3 -m pip install -U setuptools==70.0.0
 RUN python3 -m pip install psutil patroni[kubernetes,etcd]==3.3.5 psycopg2-binary==2.9.5 requests python-dateutil urllib3 six prettytable --no-cache
 RUN mv /var/lib/postgresql /var/lib/pgsql
 
-RUN mkdir /patroni && chmod -R 777 /patroni/ && \
+RUN chgrp -R 0 /etc &&  \
+    chmod -R g+w /etc && \
+    mkdir /patroni && chmod -R 777 /patroni/ && \
     chmod +x /usr/libexec/fix-permissions && \
     /usr/libexec/fix-permissions /var/run/postgresql && \
     /usr/libexec/fix-permissions /var/lib/pgsql && \
