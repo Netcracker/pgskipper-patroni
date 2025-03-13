@@ -84,8 +84,8 @@ RUN mv /var/lib/postgresql /var/lib/pgsql
 
 VOLUME /etc
 
-RUN chgrp -R 0 /etc &&  \
-    chmod -R g+w /etc && \
+RUN chgrp 0 /etc &&  \
+    chmod g+w /etc && \
     mkdir /patroni && chmod -R 777 /patroni/ && \
     chmod +x /usr/libexec/fix-permissions && \
     /usr/libexec/fix-permissions /var/run/postgresql && \

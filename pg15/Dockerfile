@@ -82,11 +82,10 @@ RUN python3 -m pip install -U setuptools==70.0.0
 RUN python3 -m pip install psutil patroni[kubernetes,etcd]==3.3.5 psycopg2-binary==2.9.5 requests python-dateutil urllib3 six prettytable --no-cache
 RUN mv /var/lib/postgresql /var/lib/pgsql
 
-# Volumes are defined to support read-only root file system
-VOLUME /etc
 
-RUN chgrp -R 0 /etc &&  \
-    chmod -R g+w /etc && \
+
+RUN chgrp 0 /etc &&  \
+    chmod g+w /etc && \
     mkdir /patroni && chmod -R 777 /patroni/ && \
     chmod +x /usr/libexec/fix-permissions && \
     /usr/libexec/fix-permissions /var/run/postgresql && \
@@ -98,6 +97,8 @@ RUN chgrp -R 0 /etc &&  \
     chmod 777 /opt/scripts/archive_wal.sh && \
     ln -s /usr/bin/python3 /usr/bin/python
 
+# Volumes are defined to support read-only root file system
+VOLUME /etc
 VOLUME /patroni
 VOLUME /run/postgresql
 
