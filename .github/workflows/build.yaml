@@ -24,10 +24,10 @@ jobs:
       matrix:
         component:
           - name: pgskipper-patroni-16
-            file: pg16/Dockerfile
+            file: Dockerfile
             context: ""
           - name: pgskipper-patroni-15
-            file: pg15/Dockerfile
+            file: Dockerfile
             context: ""
     runs-on: ubuntu-24.04
     steps:
