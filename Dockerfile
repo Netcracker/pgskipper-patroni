@@ -25,6 +25,7 @@ ENV POD_IDENTITY="node1" \
 # we craft a custom build of protobuf-c and publish it at this repo.
 # Remove this line after moving to the next CentOS releases.
 COPY scripts/archive_wal.sh /opt/scripts/archive_wal.sh
+COPY scripts/cleanup.sh /opt/scripts/cleanup.sh
 ADD ./scripts/pip.conf /root/.pip/pip.conf
 COPY ./scripts/postgresql.conf /tmp/postgresql.conf
 COPY ./scripts/fix_permission.sh /usr/libexec/fix-permissions
