@@ -77,7 +77,7 @@ RUN apt update && apt-get install -y git make gcc && \
     apt-get purge -y --auto-remove git make gcc && \
     cd .. && rm -rf pgsentinel
 
-RUN apt-get install -y alien
+RUN apt-get install -y alien vmtouch
 
 RUN cat /root/.pip/pip.conf
 RUN python3 -m pip install -U setuptools==78.1.1 wheel==0.38.0
