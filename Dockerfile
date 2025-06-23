@@ -45,7 +45,7 @@ RUN adduser -uid 26 -gid 26 postgres
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get --no-install-recommends install -y postgresql-$PG_VERSION postgresql-contrib-$PG_VERSION postgresql-server-dev-$PG_VERSION postgresql-plpython3-$PG_VERSION postgresql-$PG_VERSION-hypopg postgresql-$PG_VERSION-powa postgresql-$PG_VERSION-orafce\
     hostname gettext jq vim \
-    postgresql-$PG_VERSION-cron postgresql-$PG_VERSION-repack postgresql-$PG_VERSION-pgaudit postgresql-$PG_VERSION-pg-stat-kcache postgresql-$PG_VERSION-pg-qualstats postgresql-$PG_VERSION-set-user postgresql-$PG_VERSION-postgis pgbackrest \
+    postgresql-$PG_VERSION-cron postgresql-$PG_VERSION-repack postgresql-$PG_VERSION-pgaudit postgresql-$PG_VERSION-pg-stat-kcache postgresql-$PG_VERSION-pg-qualstats postgresql-$PG_VERSION-set-user postgresql-$PG_VERSION-postgis pgbackrest=2.54.0 \
     postgresql-$PG_VERSION-pg-wait-sampling postgresql-$PG_VERSION-pg-track-settings postgresql-$PG_VERSION-pg-hint-plan postgresql-$PG_VERSION-pgnodemx postgresql-$PG_VERSION-decoderbufs
 
 # Install LDAP utilities including openldap-clients and necessary libraries
@@ -77,7 +77,7 @@ RUN apt update && apt-get install -y git make gcc && \
     apt-get purge -y --auto-remove git make gcc && \
     cd .. && rm -rf pgsentinel
 
-RUN apt-get install -y alien vmtouch
+RUN apt-get install -y alien vmtouch openssh-server
 
 RUN cat /root/.pip/pip.conf
 RUN python3 -m pip install -U setuptools==78.1.1 wheel==0.38.0

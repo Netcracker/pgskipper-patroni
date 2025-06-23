@@ -44,10 +44,33 @@ then
 
     if ! whoami &> /dev/null; then
       if [ -w /etc/passwd ]; then
-        echo "${USER_NAME:-postgres}:x:$(id -u):0:${USER_NAME:-postgres} user:${ROOT_DIR}:/sbin/nologin" >> /etc/passwd
+        echo "${USER_NAME:-postgres}:x:$(id -u):0:${USER_NAME:-postgres} user:${ROOT_DIR}:/bin/sh" >> /etc/passwd
       fi
     fi
 
+fi
+
+if [ -n "$PGBACKREST_PG2_HOST" ]; then
+    echo "Preparation for standby backup..."
+    mkdir -p ${ROOT_DIR}/.ssh
+    chmod 700 ${ROOT_DIR}/.ssh
+
+    cp /keys/id_rsa ${ROOT_DIR}/.ssh/id_rsa
+    cp /keys/id_rsa.pub ${ROOT_DIR}/.ssh/id_rsa.pub
+    cp /keys/id_rsa.pub ${ROOT_DIR}/.ssh/authorized_keys
+    cp /keys/id_rsa.pub ${ROOT_DIR}/.ssh/known_hosts
+    sed -i "s/ssh-rsa/pg-patroni ssh-rsa/" ${ROOT_DIR}/.ssh/known_hosts
+
+    chmod 600 ${ROOT_DIR}/.ssh/id_rsa
+
+    sed -i "s/#PubkeyAuthentication yes/PubkeyAuthentication yes/" /etc/ssh/sshd_config
+    sed -i "s/#PasswordAuthentication yes/PasswordAuthentication no/" /etc/ssh/sshd_config
+    sed -i 's/#Port.*$/Port 3022/' /etc/ssh/sshd_config
+    sed -i "s/#PermitUserEnvironment no/PermitUserEnvironment yes/" /etc/ssh/sshd_config
+    sed -i "s/UsePAM yes/UsePAM no/" /etc/ssh/sshd_config
+    sed -i "s@#HostKey /etc/ssh/ssh_host_rsa_key@HostKey ~/.ssh/id_rsa@" /etc/ssh/sshd_config
+
+    /usr/sbin/sshd -E /tmp/sshd.log -o PidFile=/tmp/sshd.pid
 fi
 
 # removing postmaster.pid file in case if pgsql was stoped not gracefully  
