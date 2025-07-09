@@ -17,6 +17,7 @@
 source /setEnv.sh
 
 export PASSWD_DIR=$(dirname ${ROOT_DIR})/passwd
+export HOME=/home/postgres
 
 
 # prepare datadir
@@ -41,10 +42,14 @@ then
     echo "Adding randomly generated uid to passwd file..."
 
     sed -i '/postgres/d' /etc/passwd
-
+    export HOME=/home/pg
     if ! whoami &> /dev/null; then
       if [ -w /etc/passwd ]; then
-        echo "${USER_NAME:-postgres}:x:$(id -u):0:${USER_NAME:-postgres} user:${ROOT_DIR}:/bin/sh" >> /etc/passwd
+        if [ -n "$PGBACKREST_PG2_HOST" ]; then
+          echo "${USER_NAME:-postgres}:x:$(id -u):0:${USER_NAME:-postgres} user:${HOME}:/bin/sh" >> /etc/passwd
+        else
+          echo "${USER_NAME:-postgres}:x:$(id -u):0:${USER_NAME:-postgres} user:${ROOT_DIR}:/bin/nologin" >> /etc/passwd
+        fi
       fi
     fi
 
@@ -52,23 +57,18 @@ fi
 
 if [ -n "$PGBACKREST_PG2_HOST" ]; then
     echo "Preparation for standby backup..."
-    mkdir -p ${ROOT_DIR}/.ssh
-    chmod 700 ${ROOT_DIR}/.ssh
+    mkdir -p ${HOME}
+    chmod 700 ${HOME}
+    mkdir -p ${HOME}/.ssh
+    chmod 700 ${HOME}/.ssh
 
-    cp /keys/id_rsa ${ROOT_DIR}/.ssh/id_rsa
-    cp /keys/id_rsa.pub ${ROOT_DIR}/.ssh/id_rsa.pub
-    cp /keys/id_rsa.pub ${ROOT_DIR}/.ssh/authorized_keys
-    cp /keys/id_rsa.pub ${ROOT_DIR}/.ssh/known_hosts
-    sed -i "s/ssh-rsa/pg-patroni ssh-rsa/" ${ROOT_DIR}/.ssh/known_hosts
+    cp /keys/id_rsa ${HOME}/.ssh/id_rsa
+    cp /keys/id_rsa.pub ${HOME}/.ssh/id_rsa.pub
+    cp /keys/id_rsa.pub ${HOME}/.ssh/authorized_keys
+    cp /keys/id_rsa.pub ${HOME}/.ssh/known_hosts
+    sed -i "s/ssh-rsa/pg-patroni ssh-rsa/" ${HOME}/.ssh/known_hosts
 
-    chmod 600 ${ROOT_DIR}/.ssh/id_rsa
-
-    sed -i "s/#PubkeyAuthentication yes/PubkeyAuthentication yes/" /etc/ssh/sshd_config
-    sed -i "s/#PasswordAuthentication yes/PasswordAuthentication no/" /etc/ssh/sshd_config
-    sed -i 's/#Port.*$/Port 3022/' /etc/ssh/sshd_config
-    sed -i "s/#PermitUserEnvironment no/PermitUserEnvironment yes/" /etc/ssh/sshd_config
-    sed -i "s/UsePAM yes/UsePAM no/" /etc/ssh/sshd_config
-    sed -i "s@#HostKey /etc/ssh/ssh_host_rsa_key@HostKey ~/.ssh/id_rsa@" /etc/ssh/sshd_config
+    chmod 600 ${HOME}/.ssh/id_rsa
 
     /usr/sbin/sshd -E /tmp/sshd.log -o PidFile=/tmp/sshd.pid
 fi

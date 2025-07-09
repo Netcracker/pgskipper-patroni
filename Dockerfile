@@ -36,7 +36,7 @@ RUN apt-get -y update
 RUN apt-get -o DPkg::Options::="--force-confnew" -y dist-upgrade
 RUN apt-get update && \
     apt-get install -y --allow-downgrades gcc-12 cpp-12 gcc-12-base libgcc-12-dev libstdc++6 libgcc-s1 libnsl2
-RUN apt-get --no-install-recommends install -y python3.11 python3-pip python3-dev libpq-dev cython3 wget curl vmtouch
+RUN apt-get --no-install-recommends install -y python3.11 python3-pip python3-dev libpq-dev cython3 wget curl
 
 # rename 'tape' group to 'postgres' and creating postgres user - hask for ubuntu
 RUN groupmod -n postgres tape
@@ -45,7 +45,7 @@ RUN adduser -uid 26 -gid 26 postgres
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get --no-install-recommends install -y postgresql-$PG_VERSION postgresql-contrib-$PG_VERSION postgresql-server-dev-$PG_VERSION postgresql-plpython3-$PG_VERSION postgresql-$PG_VERSION-hypopg postgresql-$PG_VERSION-powa postgresql-$PG_VERSION-orafce\
     hostname gettext jq vim \
-    postgresql-$PG_VERSION-cron postgresql-$PG_VERSION-repack postgresql-$PG_VERSION-pgaudit postgresql-$PG_VERSION-pg-stat-kcache postgresql-$PG_VERSION-pg-qualstats postgresql-$PG_VERSION-set-user postgresql-$PG_VERSION-postgis pgbackrest=2.54.0 \
+    postgresql-$PG_VERSION-cron postgresql-$PG_VERSION-repack postgresql-$PG_VERSION-pgaudit postgresql-$PG_VERSION-pg-stat-kcache postgresql-$PG_VERSION-pg-qualstats postgresql-$PG_VERSION-set-user postgresql-$PG_VERSION-postgis pgbackrest=2.55.1 \
     postgresql-$PG_VERSION-pg-wait-sampling postgresql-$PG_VERSION-pg-track-settings postgresql-$PG_VERSION-pg-hint-plan postgresql-$PG_VERSION-pgnodemx postgresql-$PG_VERSION-decoderbufs
 
 # Install LDAP utilities including openldap-clients and necessary libraries
@@ -86,6 +86,14 @@ RUN python3 -m pip install psutil patroni[kubernetes,etcd]==3.3.5 psycopg2-binar
 RUN apt-get --no-install-recommends install -y libaom3=3.3.0-1ubuntu0.1 || apt-get --no-install-recommends install -y libaom3
 RUN mv /var/lib/postgresql /var/lib/pgsql
 
+RUN sed -i "s/postgres:!/postgres:*/" /etc/shadow && \
+    sed -i "s/#PubkeyAuthentication yes/PubkeyAuthentication yes/" /etc/ssh/sshd_config && \
+    sed -i "s/#PasswordAuthentication yes/PasswordAuthentication no/" /etc/ssh/sshd_config && \
+    sed -i 's/#Port.*$/Port 3022/' /etc/ssh/sshd_config && \
+    sed -i "s/#PermitUserEnvironment no/PermitUserEnvironment yes/" /etc/ssh/sshd_config && \
+    sed -i "s/UsePAM yes/UsePAM no/" /etc/ssh/sshd_config && \
+    sed -i "s@#HostKey /etc/ssh/ssh_host_rsa_key@HostKey ~/.ssh/id_rsa@" /etc/ssh/sshd_config
+
 RUN chgrp 0 /etc &&  \
     chmod g+w /etc && \
     chgrp 0 /etc/passwd &&  \
@@ -101,9 +109,9 @@ RUN chgrp 0 /etc &&  \
     chmod 777 /opt/scripts/archive_wal.sh && \
     ln -s /usr/bin/python3 /usr/bin/python
 
-RUN chmod 770 /var/lib/pgbackrest && \
-    chmod 770 /var/log/pgbackrest && \
-    chmod 770 /var/spool/pgbackrest && \
+RUN chmod 777 /var/lib/pgbackrest && \
+    chmod 777 /var/log/pgbackrest && \
+    chmod 777 /var/spool/pgbackrest && \
     chown postgres:0 /var/lib/pgbackrest && \
     chown postgres:0 /var/log/pgbackrest && \
     chown postgres:0 /var/spool/pgbackrest
