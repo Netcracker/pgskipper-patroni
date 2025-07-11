@@ -42,10 +42,49 @@ RUN apt-get --no-install-recommends install -y python3.11 python3-pip python3-de
 RUN groupmod -n postgres tape
 RUN adduser -uid 26 -gid 26 postgres
 
+# Install pgbackrest 2.55.1 from source
+RUN apt-get --no-install-recommends install -y \
+    build-essential \
+    libssl-dev \
+    libxml2-dev \
+    libpq-dev \
+    liblz4-dev \
+    libzstd-dev \
+    libbz2-dev \
+    libyaml-dev \
+    meson \
+    ninja-build \
+    pkg-config && \
+    cd /tmp && \
+    wget https://github.com/pgbackrest/pgbackrest/archive/release/2.55.1.tar.gz && \
+    tar -xzf 2.55.1.tar.gz && \
+    cd pgbackrest-release-2.55.1 && \
+    meson setup build && \
+    ninja -C build && \
+    ninja -C build install && \
+    cd / && \
+    rm -rf /tmp/pgbackrest-release-2.55.1 /tmp/2.55.1.tar.gz && \
+    apt-get purge -y --auto-remove \
+    build-essential \
+    libssl-dev \
+    libxml2-dev \
+    libpq-dev \
+    liblz4-dev \
+    libzstd-dev \
+    libbz2-dev \
+    libyaml-dev \
+    meson \
+    ninja-build \
+    pkg-config && \
+    apt-get clean && \
+    mkdir -p /var/lib/pgbackrest && \
+    mkdir -p /var/log/pgbackrest && \
+    mkdir -p /var/spool/pgbackrest
+
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get --no-install-recommends install -y postgresql-$PG_VERSION postgresql-contrib-$PG_VERSION postgresql-server-dev-$PG_VERSION postgresql-plpython3-$PG_VERSION postgresql-$PG_VERSION-hypopg postgresql-$PG_VERSION-powa postgresql-$PG_VERSION-orafce\
     hostname gettext jq vim \
-    postgresql-$PG_VERSION-cron postgresql-$PG_VERSION-repack postgresql-$PG_VERSION-pgaudit postgresql-$PG_VERSION-pg-stat-kcache postgresql-$PG_VERSION-pg-qualstats postgresql-$PG_VERSION-set-user postgresql-$PG_VERSION-postgis pgbackrest=2.55.1 \
+    postgresql-$PG_VERSION-cron postgresql-$PG_VERSION-repack postgresql-$PG_VERSION-pgaudit postgresql-$PG_VERSION-pg-stat-kcache postgresql-$PG_VERSION-pg-qualstats postgresql-$PG_VERSION-set-user postgresql-$PG_VERSION-postgis \
     postgresql-$PG_VERSION-pg-wait-sampling postgresql-$PG_VERSION-pg-track-settings postgresql-$PG_VERSION-pg-hint-plan postgresql-$PG_VERSION-pgnodemx postgresql-$PG_VERSION-decoderbufs
 
 # Install LDAP utilities including openldap-clients and necessary libraries
