@@ -128,7 +128,8 @@ fi
 PG_BIN_DIR=${PG_BIN_DIR} \
 PG_ROOT_PASSWORD=${PG_ROOT_PASSWORD} \
 PG_REPL_PASSWORD=${PG_REPL_PASSWORD} \
-LISTEN_ADDR=`hostname -i` \
+# hostname -i might return multiple ip addresses, so we'd better listen on all of them
+LISTEN_ADDR="*" \
 PG_CLUST_NAME=${PG_CLUST_NAME} \
 POD_NAMESPACE=${POD_NAMESPACE} \
 envsubst < /patroni/pg_template.yaml > /patroni/pg_node.yml
