@@ -1,4 +1,4 @@
-name: Docker Security Scan
+name: Security Scan
 on:
   workflow_dispatch:
     inputs:
@@ -34,11 +34,17 @@ on:
         required: false
         default: true
         type: boolean
+      only-fixed:
+        description: "Show only fixable vulnerabilities"
+        required: false
+        default: true
+        type: boolean
 
 permissions:
   contents: read
   security-events: write
   actions: read
+  packages: read
 
 jobs:
   security-scan:
@@ -49,4 +55,5 @@ jobs:
       only-high-critical: ${{ inputs.only-high-critical}}
       trivy-scan: ${{ inputs.trivy-scan }}
       grype-scan: ${{ inputs.grype-scan }}
+      only-fixed: ${{ inputs.only-fixed }}
       continue-on-error: ${{ inputs.continue-on-error }}
