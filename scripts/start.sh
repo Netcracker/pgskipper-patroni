@@ -128,6 +128,10 @@ fi
 PG_BIN_DIR=${PG_BIN_DIR} \
 PG_ROOT_PASSWORD=${PG_ROOT_PASSWORD} \
 PG_REPL_PASSWORD=${PG_REPL_PASSWORD} \
+# Deprecated: `hostname -i` might print multiple IP addresses separated with space,
+# so it is a bad fit for the listen address. We should better use `*:port` for listen address,
+# which is a static value. An environment variable with a static value does not help much,
+# so we'd better deprecate and remove LISTEN_ADDR variable
 LISTEN_ADDR=`hostname -i` \
 PG_CLUST_NAME=${PG_CLUST_NAME} \
 POD_NAMESPACE=${POD_NAMESPACE} \
