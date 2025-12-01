@@ -111,11 +111,17 @@ RUN apt update && apt-get install -y git make gcc && \
     cd pgsentinel && \
     git checkout 0218c2147daab0d2dbbf08433cb480163d321839 && \
     cd src && make install && \
-    cd ../.. && git clone --depth 1 --branch REL14_0 https://github.com/ossc-db/pg_dbms_stats.git && \
-    cd pg_dbms_stats && sed -i 's/$(MAJORVERSION)/14/g' Makefile && \
-    make install && \
+    cd ../.. && \
+    if [ "$PG_VERSION" -lt 18 ]; then \
+        git clone --depth 1 --branch REL14_0 https://github.com/ossc-db/pg_dbms_stats.git && \
+        cd pg_dbms_stats && sed -i 's/$(MAJORVERSION)/14/g' Makefile && \
+        make install && \
+        cd .. ; \
+    else \
+        echo "Skipping pg_dbms_stats: not supported on PostgreSQL $PG_VERSION"; \
+    fi && \
     apt-get purge -y --auto-remove git make gcc && \
-    cd .. && rm -rf pgsentinel
+    rm -rf pgsentinel
 
 RUN apt-get install -y alien vmtouch openssh-server
 

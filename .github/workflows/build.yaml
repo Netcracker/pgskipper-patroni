@@ -23,6 +23,10 @@ jobs:
       fail-fast: false
       matrix:
         component:
+          - name: pgskipper-patroni-18
+            file: Dockerfile
+            context: ""
+            pg_version: "18"
           - name: pgskipper-patroni-17
             file: Dockerfile
             context: ""
